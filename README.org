@@ -1,0 +1,5 @@
+#+TITLE: CLIM-MODE-LINE
+#+AUTHOR: Shozo «szos at posteo dot net»
+
+* CLIM Mode Line
+  This is a project to write a dock using CLIM inspired by the emacs and stumpwm mode lines. 
