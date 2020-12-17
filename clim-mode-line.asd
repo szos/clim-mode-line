@@ -1,7 +1,7 @@
 ;;;; clim-mode-line.asd
 
 (asdf:defsystem #:clim-mode-line
-  :description "Describe clim-mode-line here"
+  :description "A modeline inspired panel written with CLIM"
   :author "Your Name <your.name@example.com>"
   :license  "Specify license here"
   :version "0.0.1"
