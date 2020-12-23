@@ -27,7 +27,15 @@ formatters and calls them within the appropriate row/column configuration. "
 
 (defun format-nil (frame pane)
   (declare (ignore frame))
-  (slim:cell (format pane "NIL")))
+  (with-output-as-presentation (pane nil 'rotate-layout)
+    (slim:cell (format pane "NIL"))))
+
+(let ((msg ""))
+  (defun format-msg (frame pane)
+    (declare (ignore frame))
+    (slim:cell (format pane "~a" msg)))
+  (defun set-msg (m)
+    (setf msg m)))
 
 (defparameter *selected* ;; (lambda (thing) thing)
   nil
@@ -43,25 +51,23 @@ the value return by itself.")
 ;;; We need a presentation type for groups.
 (define-presentation-type stumpwm-group-presentation ())
 
-(define-clim-mode-line-command (com-move-window-to-group-2arg)
-    ((window stumpwm::window) (group stumpwm::group))
-  (stumpwm::move-window-to-group window group))
+;; (define-clim-mode-line-command (com-move-window-to-group-2arg)
+;;     ((window stumpwm::window) (group stumpwm::group))
+;;   (stumpwm::move-window-to-group window group))
 
 (define-drag-and-drop-translator drag-window (stumpwm-window-presentation command stumpwm-group-presentation
 									  clim-mode-line
-									  :gesture :left-meta-click
-									  ;; :priority 9
-)
-				 (object destination)
-  `(com-move-window-to-group-2arg ,object ,destination))
+									  :gesture :left-meta-click)
+				 (object cmd destination)
+  `(stumpwm::message "~a" '(,object ,cmd ,destination)))
 
-(define-drag-and-drop-translator drag-group (stumpwm-group-presentation command stumpwm-window-presentation
-									  clim-mode-line
-									  :gesture :left-meta-click
-									  ;; :priority 9
-)
-				 (object destination)
-  `(com-move-window-to-group-2arg ,destination ,object))
+;; (define-drag-and-drop-translator drag-group (stumpwm-group-presentation command stumpwm-window-presentation
+;; 									  clim-mode-line
+;; 									  :gesture :left-meta-click
+;; 									  ;; :priority 9
+;; 									)
+;; 				 (object destination)
+;;   `(com-move-window-to-group-2arg ,destination ,object))
 
 ;; (define-drag-and-drop-translator stumpwm-window-to-group-drag-and-drop-translator
 ;;     (stumpwm-window-presentation command stumpwm-group-presentation clim-mode-line
@@ -174,6 +180,25 @@ there must be a better way to do this... this is rediculous!!"
   (when (typep window 'stumpwm::window)
     (stumpwm::focus-all window)))
 
+;; (define-command (com-2arg-move :command-table 'clim-mode-line
+;; 			       :name "2arg move"
+;; 			       :options '(:gesture :drag-and-drop
+;; 					  :drag-above t
+;; 					  :no-context-menu t))
+;;     ((win stumpwm::window) (grp stumpwm::group))
+;;   (stumpwm:message "~a ~a" win grp))
+(define-presentation-to-command-translator 2arg-move
+    (stumpwm-window-presentation com-2arg-move clim-mode-line
+     :priority 3)
+    (win)
+  (list win))
+
+;; (define-presentation-to-command-translator 2arg-move-grp
+;;     (stumpwm-group-presentation com-2arg-move clim-mode-line
+;;      :priority 3)
+;;     (grp)
+;;   (list (accept window) grp))
+
 (defun format-windows (frame pane)
   (declare (ignore frame))
   (slim:cell (format pane "["))
@@ -181,11 +206,13 @@ there must be a better way to do this... this is rediculous!!"
 	do (slim:cell
 	     (if (equal (stumpwm::current-window) window)
 		 (with-drawing-options (pane :ink +red+)
-		   (with-output-as-presentation (pane window 'stumpwm-window-presentation :single-box t)
+		   (with-output-as-presentation (pane window 'stumpwm-window-presentation
+						      :single-box t)
 		     (format pane "~a" (stumpwm::format-expand stumpwm:*window-formatters*
 							       stumpwm:*window-format*
 							       window))))
-		 (with-output-as-presentation (pane window 'stumpwm-window-presentation :single-box t)
+		 (with-output-as-presentation (pane window 'stumpwm-window-presentation
+						    :single-box t)
 		   (format pane "~a" (stumpwm::format-expand stumpwm:*window-formatters*
 							     stumpwm:*window-format*
 							     window))))))

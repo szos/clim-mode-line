@@ -6,6 +6,12 @@
 (defvar *default-mode-line-function* 'format-mode-line)
 (defparameter *mode-line-active-formatters* '((format-nil format-groups format-windows)))
 
+;; (defun do-stumpwm-cmd (string)
+;;   )
+
+(defclass clim-mode-line-interactor (interactor-pane) ()
+  (:default-initargs :scrollbars nil))
+
 (define-application-frame clim-mode-line () ()
   ;; (:top-level )
   (:panes (display :application
@@ -13,8 +19,34 @@
 		   ;; :width 1920
 		   ;; :height 10
 		   :scroll-bars nil
-		   :borders nil))
-  (:layouts (default display)))
+		   :borders nil)
+	  ;; (mx (make-clim-stream-pane :type 'stumpwm-interactor-pane
+	  ;;  			     :name 'mx :scroll-bars nil))
+	  ;; (minibuf ;; (make-pane 'esa:minibuffer-pane)
+	  ;; 	   :application-pane )
+	  )
+  (:layouts
+   (default display)
+   ;; (input minibuf)
+   ;; (both (horizontally () (1/2 display) (1/2 minibuf)))
+   ))
+
+;; (define-clim-mode-line-command (com-rotate-layout)
+;;     ()
+;;   (let ((frame (or *application-frame*
+;; 		   (find-application-frame 'clim-mode-line :create nil :activate nil))))
+;;     (cond ((equal (frame-current-layout frame) 'default)
+;; 	   (setf (frame-current-layout frame) 'input))
+;; 	  ((equal (frame-current-layout frame) 'input)
+;; 	   (setf (frame-current-layout frame) 'both))
+;; 	  ((equal (frame-current-layout frame) 'both)
+;; 	   (setf (frame-current-layout frame) 'default)))))
+
+;; (define-presentation-type rotate-layout ())
+;; (define-presentation-to-command-translator rot-layout
+;;     (rotate-layout com-rotate-layout clim-mode-line)
+;;     (obj)
+;;   '())
 
 (defun clim-mode-line-display-function (frame pane)
   "This just calls the function stored in *default-mode-line-function*"
